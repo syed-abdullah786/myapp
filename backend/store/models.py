@@ -47,7 +47,7 @@ class Orders(models.Model):
     shipping = models.CharField(max_length=20,choices=SHIPPING_METHOD)
     order_tax_type = models.CharField(max_length=20,choices=ORDER_TAX_TYPE)
     payment = models.CharField(max_length=40,choices=PAYMENT)
-    created_at = models.CharField(max_length=20)
+    created_at = models.DateField(max_length=20)
     status = models.CharField(max_length=40,choices=ORDER_STATUS)
     priority = models.CharField(max_length=20,default='normal')
     shipping_status= models.CharField(max_length=30,default='Pending')

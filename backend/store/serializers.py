@@ -7,19 +7,19 @@ from .models import Orders, Customers, Products, Order_Item
 class ProductSerializers(serializers.ModelSerializer):
     class Meta:
         model= Products
-        fields = ['title']
+        fields = '__all__'
 
 class Order_ItemSerializers(serializers.ModelSerializer):
     product_id = ProductSerializers(read_only=True)
     class Meta:
         model= Order_Item
-        fields = ['product_id']
+        fields = '__all__'
 
 
 class CustomerSerializers(serializers.ModelSerializer):
     class Meta:
         model= Customers
-        fields = ['sur_name','last_name']
+        fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

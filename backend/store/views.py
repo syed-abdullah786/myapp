@@ -4,6 +4,10 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+
+from .filter import OrderFilter
 from .models import Orders, Customers, Products, Order_Item
 from .serializers import OrderSerializers, CustomerSerializers, ProductSerializers, Order_ItemSerializers, \
     UserSerializer
@@ -14,16 +18,18 @@ class OrdersView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Orders.objects.all()
         if not self.request.user.is_staff:
-            print('stokes',self.request.user.id)
-            queryset = Orders.objects.filter(assigned_to = self.request.user.id)
+            print('stokes', self.request.user.id)
+            queryset = Orders.objects.filter(assigned_to=self.request.user.id)
 
         return queryset
 
     serializer_class = OrderSerializers
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ['customer_id__sur_name','customer_id__last_name','products__product_id__title']
-    filterset_fields= ['id']
+    filterset_class = OrderFilter
+    search_fields = ['customer_id__sur_name', 'customer_id__last_name', 'products__product_id__title']
+    filterset_fields = ['id','status']
     permission_classes = [IsAuthenticated]
+
 
 class Customers(generics.ListAPIView):
     queryset = Customers.objects.all()
@@ -39,6 +45,20 @@ class Order_Item(generics.ListAPIView):
     queryset = Order_Item.objects.all()
     serializer_class = Order_ItemSerializers
 
+
 class User(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class OrderViewSet(ModelViewSet):
+    def get_queryset(self):
+        queryset = Orders.objects.all()
+        if not self.request.user.is_staff:
+            print('stokes', self.request.user.id)
+            queryset = Orders.objects.filter(assigned_to=self.request.user.id)
+
+        return queryset
+
+    # queryset = Orders.objects.all()
+    serializer_class = OrderSerializers
