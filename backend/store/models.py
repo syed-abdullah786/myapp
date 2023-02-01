@@ -3,7 +3,7 @@ from django.db import models
 
 
 # Create your models here.
-class Products(models.Model):
+class Product(models.Model):
     title = models.CharField(max_length=30)
     price_net = models.IntegerField()
     price_gross = models.IntegerField()
@@ -11,7 +11,7 @@ class Products(models.Model):
     sku = models.IntegerField()
 
 
-class Customers(models.Model):
+class Customer(models.Model):
     sur_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=40)
     company_name = models.CharField(max_length=50)
@@ -22,7 +22,7 @@ class Customers(models.Model):
     mail = models.EmailField()
     vat_number=models.IntegerField()
 
-class Orders(models.Model):
+class Order(models.Model):
     SHIPPING_METHOD = [
         ('standard', 'standard'),
         ('international', 'international'),
@@ -47,15 +47,16 @@ class Orders(models.Model):
     shipping = models.CharField(max_length=20,choices=SHIPPING_METHOD)
     order_tax_type = models.CharField(max_length=20,choices=ORDER_TAX_TYPE)
     payment = models.CharField(max_length=40,choices=PAYMENT)
-    created_at = models.DateField(max_length=20)
+    created_at = models.DateField(max_length=20,auto_now_add=True)
     status = models.CharField(max_length=40,choices=ORDER_STATUS)
     priority = models.CharField(max_length=20,default='normal')
-    shipping_status= models.CharField(max_length=30,default='Pending')
+    shipping_status= models.CharField(max_length=30,default='pending')
     assigned_to = models.ForeignKey(User,on_delete=models.RESTRICT)
-    customer_id = models.ForeignKey(Customers, on_delete=models.RESTRICT,related_name='customer')
+    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT,related_name='customer')
+    products = models.ManyToManyField(Product)
 
-class Order_Item(models.Model):
-    order_id = models.ForeignKey(Orders, on_delete=models.RESTRICT,related_name='products')
-    product_id = models.ForeignKey(Products, on_delete=models.RESTRICT)
+# class Order_Item(models.Model):
+#     order_id = models.ForeignKey(Orders, on_delete=models.RESTRICT,related_name='products')
+#     product_id = models.ForeignKey(Products, on_delete=models.RESTRICT)
 
 

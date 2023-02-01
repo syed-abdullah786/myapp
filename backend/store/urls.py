@@ -4,8 +4,13 @@ from . import views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register( 'neworders', views.OrderViewSet , basename="neworders")
+# router.register( 'customers', views.Customer , basename="customers"),
+# router.register( 'products', views.Product , basename="products"),
+# router.register( 'order_item', views.Order_Item , basename="order_item"),
+router.register( 'order', views.OrderView , basename="order"),
+
+
 urlpatterns = [
-    path('orders/', views.OrdersView.as_view()),
-    path('customers/', views.User.as_view()),
+    path('users/', views.User.as_view())
+    # path('employees/', views.User.as_view()),
 ]+ router.urls

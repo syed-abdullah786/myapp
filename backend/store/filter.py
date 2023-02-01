@@ -1,12 +1,12 @@
 from django_filters.rest_framework import FilterSet
-from .models import Orders
+from .models import Order
 
 
 class OrderFilter(FilterSet):
     class Meta:
-        model = Orders
+        model = Order
         fields = {
-            'created_at': ['gt', 'lt'],
+            'created_at': ['gte', 'lte'],
             'status': ['exact'],
             'id':['exact']
         }
