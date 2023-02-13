@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'myapp',
     'store',
     'djoser',
+    'rest_framework_nested',
     'django_filters',
     'corsheaders',
 ]
