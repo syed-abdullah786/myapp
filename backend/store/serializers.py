@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .models import Order, Customer, Product, Supplier, Note, Timeline
+from .models import Order, Customer, Product, Supplier, Note, SupplierProduct
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -11,12 +11,26 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = '__all__'
 
+
+class GetSupplierProductSerializer(serializers.ModelSerializer):
+    supplier = SupplierSerializer()
+
+    class Meta:
+        model = SupplierProduct
+        fields = '__all__'
+
+
+class SupplierProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierProduct
+        fields = '__all__'
+
     def save(self, **kwargs):
         request = self.context['request']
         if request.method == 'POST':
             print('self.validated_data', self.validated_data)
             prod_id = self.context['prod_id']
-            supp = Supplier.objects.create(**self.validated_data)
+            supp = SupplierProduct.objects.create(**self.validated_data)
             product = Product.objects.get(id=prod_id)
             product.supplier.add(supp)
             self.instance = supp
@@ -30,7 +44,7 @@ class SupplierSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    supplier = SupplierSerializer(many=True)
+    supplier = GetSupplierProductSerializer(many=True)
 
     class Meta:
         model = Product
@@ -64,14 +78,10 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
+
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = '__all__'
-
-class TimelineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Timeline
         fields = '__all__'
 
 
@@ -80,6 +90,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username']
 
+
+class EditOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        exclude = ('products','created_at','customer' )
 
 class OrderSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()

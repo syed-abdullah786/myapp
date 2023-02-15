@@ -8,7 +8,9 @@ from .models import Customer
 router = routers.DefaultRouter()
 router.register('customers', views.CustomerViewSet, basename="customers"),
 router.register('products', views.ProductViewSet, basename="products"),
-router.register('suppliers', views.SupplierViewSet, basename="suppliers"),
+router.register('editorder', views.EditOrderSerializerViewSet, basename="editorder"),
+router.register('supplierproduct', views.SupplierProductViewSet, basename="supplierproduct"),
+router.register('supplier', views.SupplierViewSet, basename="supplier"),
 router.register('order', views.OrderView, basename="order"),
 orders_router = routers.NestedDefaultRouter(router, 'order', lookup='order')
 orders_router.register('notes', views.NoteViewSet, basename='order-notes')

@@ -3,7 +3,15 @@ from django.db import models
 
 
 class Supplier(models.Model):
-    name = models.CharField(max_length=30)
+    allegro_name = models.CharField(max_length=50)
+    full_name = models.CharField(max_length=50)
+    bank_detail = models.CharField(max_length=150)
+    address = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20)
+
+
+class SupplierProduct(models.Model):
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     sku = models.IntegerField()
     buying_price = models.IntegerField()
 
@@ -11,12 +19,12 @@ class Supplier(models.Model):
 # Create your models here.
 class Product(models.Model):
     title = models.CharField(max_length=30)
-    price_net = models.IntegerField()
-    price_gross = models.IntegerField()
+    price_net = models.DecimalField(max_digits=8, decimal_places=2)
+    price_gross = models.DecimalField(max_digits=8, decimal_places=2)
     quantity = models.IntegerField()
     discount = models.IntegerField()
     sku = models.IntegerField()
-    supplier = models.ManyToManyField(Supplier, related_name='products', null=True)
+    supplier = models.ManyToManyField(SupplierProduct, related_name='products', null=True)
 
 
 class Customer(models.Model):
@@ -30,7 +38,7 @@ class Customer(models.Model):
     country = models.CharField(max_length=150)
     phone = models.CharField(max_length=50)
     mail = models.EmailField()
-    vat_number = models.IntegerField()
+    vat_number = models.CharField(max_length=30)
     l_sur_name = models.CharField(max_length=40)
     l_last_name = models.CharField(max_length=40)
     l_company_name = models.CharField(max_length=50)
@@ -72,7 +80,7 @@ class Order(models.Model):
     shipping_status = models.CharField(max_length=30, default='pending')
     assigned_to = models.ForeignKey(User, on_delete=models.RESTRICT)
     customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
-    products = models.ManyToManyField(Product)
+    products = models.ManyToManyField(Product,null=True)
 
 
 class Note(models.Model):
@@ -82,9 +90,3 @@ class Note(models.Model):
     order = models.ForeignKey(Order,on_delete=models.CASCADE)
 
 
-class Timeline(models.Model):
-    title = models.CharField(max_length=70)
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    desc = models.CharField(max_length=70)
-    order = models.ForeignKey(Order,on_delete=models.CASCADE)

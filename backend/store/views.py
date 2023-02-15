@@ -12,9 +12,9 @@ from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from .filter import OrderFilter
-from .models import Order, Customer, Product, Supplier, Note, Timeline
+from .models import Order, Customer, Product, Supplier, Note, SupplierProduct
 from .serializers import OrderSerializer, CustomerSerializer, ProductSerializer, UserSerializer, EditProductSerializer, \
-    SupplierSerializer, NoteSerializer, TimelineSerializer
+    SupplierSerializer, NoteSerializer, SupplierProductSerializer, EditOrderSerializer
 
 
 class OrderView(ModelViewSet):
@@ -41,10 +41,18 @@ class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+class EditOrderSerializerViewSet(ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = EditOrderSerializer
 
 class SupplierViewSet(ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
+
+
+class SupplierProductViewSet(ModelViewSet):
+    queryset = SupplierProduct.objects.all()
+    serializer_class = SupplierProductSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -67,13 +75,6 @@ class NoteViewSet(ModelViewSet):
     def get_queryset(self):
         order = self.kwargs['order_pk']
         return Note.objects.filter(order_id=order)
-
-
-
-
-class TimelineViewSet(ModelViewSet):
-    queryset = Timeline.objects.all()
-    serializer_class = TimelineSerializer
 
 
 class User(generics.ListAPIView):
