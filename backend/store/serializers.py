@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .models import Order, Customer, Product, Supplier, Note, SupplierProduct
+from .models import Order, Customer, Product, Supplier, Note, SupplierProduct, File
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -85,6 +85,12 @@ class NoteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -109,23 +115,27 @@ class OrderSerializer(serializers.ModelSerializer):
         print('validated data', self.validated_data)
         if request.method == 'POST':
             with transaction.atomic():
-
+                company_name = self.validated_data['customer'].get('company_name', '')
+                street_2 = self.validated_data['customer'].get('street_2', '')
+                vat_number = self.validated_data['customer'].get('vat_number', '')
+                l_company_name = self.validated_data['customer'].get('l_company_name', '')
+                l_street_2 = self.validated_data['customer'].get('l_street_2', '')
                 customer = Customer(sur_name=self.validated_data['customer']['sur_name'],
                                     last_name=self.validated_data['customer']['last_name'],
-                                    company_name=self.validated_data['customer']['company_name'],
+                                    company_name=company_name,
                                     street=self.validated_data['customer']['street'],
-                                    street_2=self.validated_data['customer']['street_2'],
+                                    street_2=street_2,
                                     zip_code=self.validated_data['customer']['zip_code'],
                                     city=self.validated_data['customer']['city'],
                                     country=self.validated_data['customer']['country'],
                                     phone=self.validated_data['customer']['phone'],
                                     mail=self.validated_data['customer']['mail'],
-                                    vat_number=self.validated_data['customer']['vat_number'],
+                                    vat_number=vat_number,
                                     l_sur_name=self.validated_data['customer']['l_sur_name'],
                                     l_last_name=self.validated_data['customer']['l_last_name'],
-                                    l_company_name=self.validated_data['customer']['l_company_name'],
+                                    l_company_name=l_company_name,
                                     l_street=self.validated_data['customer']['l_street'],
-                                    l_street_2=self.validated_data['customer']['l_street_2'],
+                                    l_street_2=l_street_2,
                                     l_zip_code=self.validated_data['customer']['l_zip_code'],
                                     l_city=self.validated_data['customer']['l_city'],
                                     l_country=self.validated_data['customer']['l_country'],
@@ -133,18 +143,18 @@ class OrderSerializer(serializers.ModelSerializer):
                 customer.save()
 
                 # code for pythonanywhere, it didnot support bulk_create
-                # order_items = []
-                # for item in self.validated_data['products']:
-                #     prod = Product(title=item['title'], price_net=item['price_net'], price_gross=item['price_gross'],
-                #                    quantity=item['quantity'], sku=item['sku'])
-                #     prod.save()
-                #     order_items.append(prod)
+                order_items = []
+                for item in self.validated_data['products']:
+                    prod = Product(title=item['title'], price_net=item['price_net'], price_gross=item['price_gross'],
+                                   quantity=item['quantity'], discount=item['discount'], sku=item['sku'])
+                    prod.save()
+                    order_items.append(prod)
 
-                order_items = [
-                    Product(title=item['title'], price_net=item['price_net'], price_gross=item['price_gross'],
-                            quantity=item['quantity'], discount=item['discount'], sku=item['sku']) for item
-                    in self.validated_data['products']]
-                Product.objects.bulk_create(order_items)
+                # order_items = [
+                #     Product(title=item['title'], price_net=item['price_net'], price_gross=item['price_gross'],
+                #             quantity=item['quantity'], discount=item['discount'], sku=item['sku']) for item
+                #     in self.validated_data['products']]
+                # Product.objects.bulk_create(order_items)
                 for product in order_items:
                     product_id = product.id
                     print(product_id)
@@ -155,7 +165,6 @@ class OrderSerializer(serializers.ModelSerializer):
                               payment=self.validated_data['payment'],
                               status=self.validated_data['status'],
                               priority=self.validated_data['priority'],
-                              shipping_status=self.validated_data['shipping_status'],
                               assigned_to=self.validated_data['assigned_to'],
                               customer=customer,
                               )
@@ -177,20 +186,25 @@ class OrderSerializer(serializers.ModelSerializer):
                 # for customer update
                 obj.customer.sur_name = self.validated_data['customer']['sur_name']
                 obj.customer.last_name = self.validated_data['customer']['last_name']
-                obj.customer.company_name = self.validated_data['customer']['company_name']
+                if self.validated_data['customer']['company_name']:
+                    obj.customer.company_name = self.validated_data['customer']['company_name']
                 obj.customer.street = self.validated_data['customer']['street']
-                obj.customer.street_2 = self.validated_data['customer']['street_2']
+                if self.validated_data['customer']['street_2']:
+                    obj.customer.street_2 = self.validated_data['customer']['street_2']
                 obj.customer.zip_code = self.validated_data['customer']['zip_code']
                 obj.customer.country = self.validated_data['customer']['country']
                 obj.customer.city = self.validated_data['customer']['city']
                 obj.customer.phone = self.validated_data['customer']['phone']
                 obj.customer.mail = self.validated_data['customer']['mail']
-                obj.customer.vat_number = self.validated_data['customer']['vat_number']
+                if self.validated_data['customer']['vat_number']:
+                    obj.customer.vat_number = self.validated_data['customer']['vat_number']
                 obj.customer.l_sur_name = self.validated_data['customer']['l_sur_name']
                 obj.customer.l_last_name = self.validated_data['customer']['l_last_name']
-                obj.customer.l_company_name = self.validated_data['customer']['l_company_name']
+                if self.validated_data['customer']['l_company_name']:
+                    obj.customer.l_company_name = self.validated_data['customer']['l_company_name']
                 obj.customer.l_street = self.validated_data['customer']['l_street']
-                obj.customer.l_street_2 = self.validated_data['customer']['l_street_2']
+                if self.validated_data['customer']['l_street_2']:
+                    obj.customer.l_street_2 = self.validated_data['customer']['l_street_2']
                 obj.customer.l_zip_code = self.validated_data['customer']['l_zip_code']
                 obj.customer.l_country = self.validated_data['customer']['l_country']
                 obj.customer.l_city = self.validated_data['customer']['l_city']
@@ -209,7 +223,6 @@ class OrderSerializer(serializers.ModelSerializer):
                 obj.payment = self.validated_data['payment']
                 obj.status = self.validated_data['status']
                 obj.priority = self.validated_data['priority']
-                obj.shipping_status = self.validated_data['shipping_status']
                 obj.assigned_to = self.validated_data['assigned_to']
                 obj.save()
                 print(obj)
